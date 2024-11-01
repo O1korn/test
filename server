@@ -1,0 +1,28 @@
+from flask import Flask, request
+import csv
+import datetime
+
+app = Flask(__name__)
+
+# Ініціалізуємо CSV-файл
+with open("sensor_data.csv", mode="w", newline="") as file:
+    writer = csv.writer(file)
+    writer.writerow(["Timestamp", "Temperature", "Humidity", "PPM"])
+
+@app.route('/data', methods=['POST'])
+def receive_data():
+    data = request.json
+    timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    temperature = data.get("temperature")
+    humidity = data.get("humidity")
+    ppm = data.get("ppm")
+
+    # Запис даних у файл CSV
+    with open("sensor_data.csv", mode="a", newline="") as file:
+        writer = csv.writer(file)
+        writer.writerow([timestamp, temperature, humidity, ppm])
+
+    return "Data received", 200
+
+if __name__ == '__main__':
+    app.run(host="0.0.0.0", port=5000)
